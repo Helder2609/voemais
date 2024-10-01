@@ -1,13 +1,29 @@
 'use client'
 
 import Pagina from "@/components/Pagina"
-import Link from "next/link"
-import { Table } from "react-bootstrap"
-import { FaPlusCircle } from "react-icons/fa";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Button, Table } from "react-bootstrap"
+import { FaEdit, FaPlusCircle, FaRegEdit, FaTrash } from "react-icons/fa";
 
 export default function Page() {
 
-    const empresas = JSON.parse(localStorage.getItem('empresas')) || []
+    const [empresas, setEmpresas] = useState([])
+
+    useEffect(() => {
+        setEmpresas(JSON.parse(localStorage.getItem('empresas')) || [])
+    }, [])
+
+    function excluir(id) {
+        if (confirm('Deseja realmente excluir o registro?')) {
+            const dados = empresas.filter(item => item.id != id)
+            localStorage.setItem('empresas', JSON.stringify(dados))
+            setEmpresas(dados)
+
+
+        }
+    }
+
 
     return (
         <Pagina titulo="Empresas">
@@ -28,9 +44,19 @@ export default function Page() {
                     </tr>
                 </thead>
                 <tbody>
-                    {empresas.map(item => (
-                        <tr>
-                            <td>1</td>
+                    {empresas.map((item, i) => (
+                        <tr key={item.id}>
+                            <td>
+
+                                <Link href={`/empresas/create/edit/${item.id}`}>
+                                <FaRegEdit titte="Editar"  className="text-primary me-2" />
+                                
+                                </Link>
+
+                                <FaTrash titte="Excluir"
+                                    className="text-danger"
+                                    onClick={() => excluir(item.id)} />
+                            </td>
                             <td>{item.nome}</td>
                             <td>
                                 <a href={item.site} target="_blank">
