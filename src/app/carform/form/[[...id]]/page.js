@@ -12,7 +12,6 @@ import { v4 } from "uuid";
 import InputMask from "react-input-mask";
 import { useState } from "react";
 
-// Define as marcas e seus respectivos modelos
 const marcasCarros = {
     "Volkswagen": ["Fusca", "Gol", "T-Cross", "Tiguan", "Jetta", "Passat"],
     "Honda": ["Civic", "HR-V", "Fit", "CR-V"],
@@ -45,7 +44,7 @@ export default function CarroForm({ params }) {
 
     const [fotoPreview, setFotoPreview] = useState(carro.foto || '');
     const [marcaSelecionada, setMarcaSelecionada] = useState(carro.marca || '');
-    
+
     // Filtra os modelos com base na marca selecionada
     const modelosFiltrados = marcaSelecionada ? marcasCarros[marcaSelecionada] || [] : [];
 
@@ -75,6 +74,7 @@ export default function CarroForm({ params }) {
 
     return (
         <Pagina titulo="Cadastro de Carros">
+
             <Formik
                 initialValues={carro}
                 validationSchema={CarroValidator}
@@ -184,6 +184,27 @@ export default function CarroForm({ params }) {
                             </Form.Control.Feedback>
                         </Form.Group>
 
+                        <Form.Group className="mb-3" controlId="placa">
+                            <Form.Label>Placa</Form.Label>
+                            <InputMask
+                                mask="aaa-9*99" // Máscara para placas padrão Brasil
+                                value={values.placa}
+                                onChange={handleChange('placa')}
+                            >
+                                {(inputProps) => (
+                                    <Form.Control
+                                        {...inputProps}
+                                        type="text"
+                                        name="placa"
+                                        isInvalid={errors.placa}
+                                    />
+                                )}
+                            </InputMask>
+                            <Form.Control.Feedback type="invalid">
+                                {errors.placa}
+                            </Form.Control.Feedback>
+                        </Form.Group>
+
                         <Form.Group className="mb-3" controlId="foto">
                             <Form.Label>Foto</Form.Label>
                             <Form.Control
@@ -197,7 +218,7 @@ export default function CarroForm({ params }) {
                                 </div>
                             )}
                         </Form.Group>
-                        
+
                         <div className="text-center">
                             <Button onClick={handleSubmit} variant="success">
                                 <FaCheck /> Salvar

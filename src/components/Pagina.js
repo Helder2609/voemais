@@ -26,6 +26,7 @@ export default function Pagina(props) {
                         <Nav.Link href="/passagens">Passagens</Nav.Link>
                         <Nav.Link href="/passageiros">Passageiros</Nav.Link>
                         <Nav.Link href="/carform">Carros</Nav.Link>
+                        <Nav.Link href="/manutencao">Agendamentos </Nav.Link>
                     </Nav>
                 </Container>
             </Navbar>

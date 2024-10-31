@@ -1,5 +1,4 @@
 'use client'
-
 import Pagina from "@/components/Pagina"
 import Link from "next/link"
 import { useEffect, useState } from "react";
@@ -7,6 +6,7 @@ import { Table } from "react-bootstrap"
 import { FaPlusCircle } from "react-icons/fa";
 import { FaRegEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
+
 
 export default function Page() {
     const [carros, setCarros] = useState([]);
@@ -25,6 +25,7 @@ export default function Page() {
 
     return (
         <Pagina titulo="Carros">
+            
             <Link
                 href="/carform/form"
                 className="btn btn-primary mb-3"
@@ -36,7 +37,7 @@ export default function Page() {
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Foto</th> {/* Nova coluna para a foto */}
+                        <th>Foto</th>
                         <th>Marca</th>
                         <th>Modelo</th>
                         <th>Ano</th>
