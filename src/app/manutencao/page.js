@@ -48,7 +48,7 @@ const AgendamentosPage = () => {
                     {agendamentos.map((item, i) => (
                         <tr key={item.id}>
                             <td>
-                                <Link href={`/carMaintenance/edit/${item.id}`}>
+                                <Link href={`/manutencao/form/${item.id}`}>
                                     <FaRegEdit title="Editar" className="text-primary" />
                                 </Link>
                                 <MdDelete

@@ -1,146 +1,139 @@
-// src/components/CarMaintenanceForm.js
-'use client';
+'use client'
+import Image from "next/image";
+import Head from "next/head";
+import { useEffect, useRef, useState } from "react";
 
-import Pagina from "@/components/Pagina";
-import { Formik } from "formik";
-import { useRouter } from "next/navigation";
-import { Button, Form } from "react-bootstrap";
-import { FaCheck } from "react-icons/fa";
-import { MdOutlineArrowBack } from "react-icons/md";
-import * as Yup from "yup";
-import { v4 as uuidv4 } from "uuid";
-import InputMask from "react-input-mask";
-import { useState } from "react";
+// Adicione sua chave de API aqui
+const API_KEY = 'YOUR_TOMTOM_API_KEY'; // substitua pela sua chave de API
 
-const CarMaintenanceForm = () => {
-    const route = useRouter();
-    const [successMessage, setSuccessMessage] = useState('');
+export default function Home() {
+    const mapRef = useRef(null); // Ref para o mapa
+    const [mapLoaded, setMapLoaded] = useState(false); // Estado para verificar se o mapa foi carregado
 
-    const MaintenanceSchema = Yup.object().shape({
-        serviceType: Yup.string().required('Tipo de serviço é obrigatório'),
-        date: Yup.date().required('Data é obrigatória').nullable(),
-        time: Yup.string().required('Hora é obrigatória'),
-        latitude: Yup.number().required('Latitude é obrigatória'),
-        longitude: Yup.number().required('Longitude é obrigatória'),
-    });
+    useEffect(() => {
+        // Função para carregar o script do TomTom
+        const loadTomTomScript = () => {
+            const script = document.createElement("script");
+            script.src = "https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps-web.min.js";
+            script.onload = () => setMapLoaded(true); // Define o estado como carregado quando o script termina de carregar
+            document.body.appendChild(script);
+        };
 
-    function handleSubmit(values) {
-        values.id = uuidv4();
-        const agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
-        agendamentos.push(values);
-        localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+        loadTomTomScript();
+    }, []);
 
-        setSuccessMessage('Agendamento realizado com sucesso!');
-        setTimeout(() => {
-            route.push('/carMaintenance/scheduled'); // Redireciona para a página de agendamentos
-        }, 2000);
-    }
+    useEffect(() => {
+        // Inicializa o mapa quando o script é carregado
+        if (mapLoaded && window.tt) {
+            const map = window.tt.map({
+                key: API_KEY,
+                container: mapRef.current,
+                center: [-46.6333, -23.5505], // Coordenadas iniciais (São Paulo)
+                zoom: 12,
+            });
+
+            return () => map.remove(); // Limpa o mapa ao desmontar
+        }
+    }, [mapLoaded]);
 
     return (
-        <Pagina titulo="Agendamento de Manutenção">
+        <div >
+            <Head>
+                <link
+                    rel="stylesheet"
+                    type="text/css"
+                    href="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps.css"
+                />
+            </Head>
+            <main >
+                <Image
 
-            {successMessage && <div className="alert alert-success">{successMessage}</div>}
+                    src="https://nextjs.org/icons/next.svg"
+                    alt="Next.js logo"
+                    width={180}
+                    height={38}
+                    priority
+                />
+                <ol>
+                    <li>
+                        Get started by editing <code>src/app/page.js</code>.
+                    </li>
+                    <li>Save and see your changes instantly.</li>
+                </ol>
 
-            <Formik
-                initialValues={{
-                    serviceType: '',
-                    date: '',
-                    time: '',
-                    latitude: '',
-                    longitude: '',
-                }}
-                validationSchema={MaintenanceSchema}
-                onSubmit={handleSubmit}
-            >
-                {({ values, handleChange, handleSubmit, errors }) => (
-                    <Form>
-                        <Form.Group className="mb-3" controlId="serviceType">
-                            <Form.Label>Tipo de Serviço</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="serviceType"
-                                value={values.serviceType}
-                                onChange={handleChange}
-                                isInvalid={errors.serviceType}
-                            />
-                            <Form.Control.Feedback type="invalid">{errors.serviceType}</Form.Control.Feedback>
-                        </Form.Group>
+                <div>
+                    <a
+                        
+                        
+                        href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <Image
 
-                        <Form.Group className="mb-3" controlId="date">
-                            <Form.Label>Data</Form.Label>
-                            <Form.Control
-                                type="date"
-                                name="date"
-                                value={values.date}
-                                onChange={handleChange}
-                                isInvalid={errors.date}
-                            />
-                            <Form.Control.Feedback type="invalid">{errors.date}</Form.Control.Feedback>
-                        </Form.Group>
+                            src="https://nextjs.org/icons/vercel.svg"
+                            alt="Vercel logomark"
+                            width={20}
+                            height={20}
+                        />
+                        Deploy now
+                    </a>
+                    <a
+                        href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                        target="_blank"
+                        rel="noopener noreferrer"
 
-                        <Form.Group className="mb-3" controlId="time">
-                            <Form.Label>Hora</Form.Label>
-                            <Form.Control
-                                type="time"
-                                name="time"
-                                value={values.time}
-                                onChange={handleChange}
-                                isInvalid={errors.time}
-                            />
-                            <Form.Control.Feedback type="invalid">{errors.time}</Form.Control.Feedback>
-                        </Form.Group>
+                    >
+                        Read our docs
+                    </a>
+                </div>
 
-                        <Form.Group className="mb-3" controlId="latitude">
-                            <Form.Label>Latitude</Form.Label>
-                            <InputMask
-                                mask="9.999999" // Máscara para latitude
-                                value={values.latitude}
-                                onChange={handleChange('latitude')}
-                            >
-                                {(inputProps) => (
-                                    <Form.Control
-                                        {...inputProps}
-                                        type="text"
-                                        name="latitude"
-                                        isInvalid={errors.latitude}
-                                    />
-                                )}
-                            </InputMask>
-                            <Form.Control.Feedback type="invalid">{errors.latitude}</Form.Control.Feedback>
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="longitude">
-                            <Form.Label>Longitude</Form.Label>
-                            <InputMask
-                                mask="9.999999" // Máscara para longitude
-                                value={values.longitude}
-                                onChange={handleChange('longitude')}
-                            >
-                                {(inputProps) => (
-                                    <Form.Control
-                                        {...inputProps}
-                                        type="text"
-                                        name="longitude"
-                                        isInvalid={errors.longitude}
-                                    />
-                                )}
-                            </InputMask>
-                            <Form.Control.Feedback type="invalid">{errors.longitude}</Form.Control.Feedback>
-                        </Form.Group>
-
-                        <div className="text-center">
-                            <Button onClick={handleSubmit} variant="success">
-                                <FaCheck /> Agendar Manutenção
-                            </Button>
-                            <Button variant="danger" className="ms-2" onClick={() => route.push('/carMaintenance/scheduled')}>
-                                <MdOutlineArrowBack /> Voltar
-                            </Button>
-                        </div>
-                    </Form>
-                )}
-            </Formik>
-        </Pagina>
+                <div style={{ height: '400px', width: '100%', marginTop: '20px' }} ref={mapRef} /> {/* Mapa TomTom */}
+            </main>
+            <footer >
+                <a
+                    href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Image
+                        aria-hidden
+                        src="https://nextjs.org/icons/file.svg"
+                        alt="File icon"
+                        width={16}
+                        height={16}
+                    />
+                    Learn
+                </a>
+                <a
+                    href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Image
+                        aria-hidden
+                        src="https://nextjs.org/icons/window.svg"
+                        alt="Window icon"
+                        width={16}
+                        height={16}
+                    />
+                    Examples
+                </a>
+                <a
+                    href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Image
+                        aria-hidden
+                        src="https://nextjs.org/icons/globe.svg"
+                        alt="Globe icon"
+                        width={16}
+                        height={16}
+                    />
+                    Go to nextjs.org →
+                </a>
+            </footer>
+        </div>
     );
-};
-
-export default CarMaintenanceForm;
+}

@@ -24,6 +24,7 @@
 
     --button-primary-hover: #ccc;
     --button-secondary-hover: #1a1a1a;
+    padding: 20px;
   }
 }
 
@@ -42,6 +43,7 @@
   line-height: 24px;
   letter-spacing: -0.01em;
   list-style-position: inside;
+  text-align: center;
 }
 
 .main li:not(:last-of-type) {
