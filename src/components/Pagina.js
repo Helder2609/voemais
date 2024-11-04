@@ -15,18 +15,15 @@ export default function Pagina(props) {
                     </Navbar.Brand>
                     <Nav className="me-auto">
                         <NavDropdown title="Backend" id="basic-nav-dropdown">
-                            <NavDropdown.Item href="/backend/empresas">
+                            <NavDropdown.Item href="/carform">
                                Empresas
                             </NavDropdown.Item>
                             <NavDropdown.Divider />
                         </NavDropdown>
-                        <Nav.Link href="/empresas">Empresas</Nav.Link>
-                        <Nav.Link href="/aeroportos">Aeroportos</Nav.Link>
-                        <Nav.Link href="/voos">Voos</Nav.Link>
-                        <Nav.Link href="/passagens">Passagens</Nav.Link>
-                        <Nav.Link href="/passageiros">Passageiros</Nav.Link>
                         <Nav.Link href="/carform">Carros</Nav.Link>
                         <Nav.Link href="/manutencao">Agendamentos </Nav.Link>
+                        <Nav.Link href="/customizacao">Customização </Nav.Link>
+                        <Nav.Link href="/vendas">Vendas </Nav.Link>
                     </Nav>
                 </Container>
             </Navbar>

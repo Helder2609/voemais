@@ -7,7 +7,6 @@ import { FaPlusCircle } from "react-icons/fa";
 import { FaRegEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 
-
 export default function Page() {
     const [carros, setCarros] = useState([]);
 
@@ -25,7 +24,7 @@ export default function Page() {
 
     return (
         <Pagina titulo="Carros">
-            
+
             <Link
                 href="/carform/form"
                 className="btn btn-primary mb-3"
@@ -43,6 +42,7 @@ export default function Page() {
                         <th>Ano</th>
                         <th>Cor</th>
                         <th>Quilometragem</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -60,10 +60,10 @@ export default function Page() {
                             </td>
                             <td>
                                 {item.foto && (
-                                    <img 
-                                        src={item.foto} 
-                                        alt="Foto do Carro" 
-                                        style={{ width: "95px", height: "auto" }} 
+                                    <img
+                                        src={item.foto}
+                                        alt="Foto do Carro"
+                                        style={{ width: "95px", height: "auto" }}
                                     />
                                 )}
                             </td>
@@ -72,6 +72,11 @@ export default function Page() {
                             <td>{item.ano}</td>
                             <td>{item.cor}</td>
                             <td>{item.quilometragem} km</td>
+                            <td>
+                                <Link href={`/customizacao/form/${item.id}`} className="btn btn-secondary">
+                                    Customizar
+                                </Link>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
