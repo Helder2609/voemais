@@ -1,139 +1,126 @@
-'use client'
-import Image from "next/image";
-import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
+'use client';
+import { useState } from 'react';
+import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import Pagina from "@/components/Pagina";
 
-// Adicione sua chave de API aqui
-const API_KEY = 'YOUR_TOMTOM_API_KEY'; // substitua pela sua chave de API
+const AgendamentoCarro = () => {
+    const [formData, setFormData] = useState({
+        nome: '',
+        email: '',
+        modeloCarro: '',
+        data: '',
+        horario: '',
+    });
+    const [alertMessage, setAlertMessage] = useState('');
+    const [success, setSuccess] = useState(false);
 
-export default function Home() {
-    const mapRef = useRef(null); // Ref para o mapa
-    const [mapLoaded, setMapLoaded] = useState(false); // Estado para verificar se o mapa foi carregado
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
 
-    useEffect(() => {
-        // Função para carregar o script do TomTom
-        const loadTomTomScript = () => {
-            const script = document.createElement("script");
-            script.src = "https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps-web.min.js";
-            script.onload = () => setMapLoaded(true); // Define o estado como carregado quando o script termina de carregar
-            document.body.appendChild(script);
-        };
+    const handleSubmit = (e) => {
+        e.preventDefault();
 
-        loadTomTomScript();
-    }, []);
-
-    useEffect(() => {
-        // Inicializa o mapa quando o script é carregado
-        if (mapLoaded && window.tt) {
-            const map = window.tt.map({
-                key: API_KEY,
-                container: mapRef.current,
-                center: [-46.6333, -23.5505], // Coordenadas iniciais (São Paulo)
-                zoom: 12,
-            });
-
-            return () => map.remove(); // Limpa o mapa ao desmontar
+        // Validação simples de campos obrigatórios
+        if (!formData.nome || !formData.email || !formData.modeloCarro || !formData.data || !formData.horario) {
+            setAlertMessage('Por favor, preencha todos os campos.');
+            setSuccess(false);
+            return;
         }
-    }, [mapLoaded]);
+
+        // Aqui você pode salvar os dados em localStorage ou enviar para uma API
+        const agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+        agendamentos.push(formData);
+        localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+
+        setAlertMessage('Agendamento realizado com sucesso!');
+        setSuccess(true);
+        setFormData({
+            nome: '',
+            email: '',
+            modeloCarro: '',
+            data: '',
+            horario: '',
+        });
+    };
 
     return (
-        <div >
-            <Head>
-                <link
-                    rel="stylesheet"
-                    type="text/css"
-                    href="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps.css"
-                />
-            </Head>
-            <main >
-                <Image
+        <Pagina>
+            <Container>
+                <h2>Agendamento de Test Drive</h2>
 
-                    src="https://nextjs.org/icons/next.svg"
-                    alt="Next.js logo"
-                    width={180}
-                    height={38}
-                    priority
-                />
-                <ol>
-                    <li>
-                        Get started by editing <code>src/app/page.js</code>.
-                    </li>
-                    <li>Save and see your changes instantly.</li>
-                </ol>
+                {alertMessage && (
+                    <Alert variant={success ? 'success' : 'danger'}>
+                        {alertMessage}
+                    </Alert>
+                )}
 
-                <div>
-                    <a
-                        
-                        
-                        href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <Image
+                <Form onSubmit={handleSubmit}>
+                    <Row className="mb-3">
+                        <Form.Group as={Col} md={6}>
+                            <Form.Label>Nome</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="nome"
+                                value={formData.nome}
+                                onChange={handleInputChange}
+                                placeholder="Seu nome"
+                            />
+                        </Form.Group>
 
-                            src="https://nextjs.org/icons/vercel.svg"
-                            alt="Vercel logomark"
-                            width={20}
-                            height={20}
-                        />
-                        Deploy now
-                    </a>
-                    <a
-                        href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        <Form.Group as={Col} md={6}>
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                placeholder="Seu e-mail"
+                            />
+                        </Form.Group>
+                    </Row>
 
-                    >
-                        Read our docs
-                    </a>
-                </div>
+                    <Row className="mb-3">
+                        <Form.Group as={Col} md={6}>
+                            <Form.Label>Modelo do Carro</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="modeloCarro"
+                                value={formData.modeloCarro}
+                                onChange={handleInputChange}
+                                placeholder="Ex.: Honda Civic"
+                            />
+                        </Form.Group>
 
-                <div style={{ height: '400px', width: '100%', marginTop: '20px' }} ref={mapRef} /> {/* Mapa TomTom */}
-            </main>
-            <footer >
-                <a
-                    href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Image
-                        aria-hidden
-                        src="https://nextjs.org/icons/file.svg"
-                        alt="File icon"
-                        width={16}
-                        height={16}
-                    />
-                    Learn
-                </a>
-                <a
-                    href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Image
-                        aria-hidden
-                        src="https://nextjs.org/icons/window.svg"
-                        alt="Window icon"
-                        width={16}
-                        height={16}
-                    />
-                    Examples
-                </a>
-                <a
-                    href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Image
-                        aria-hidden
-                        src="https://nextjs.org/icons/globe.svg"
-                        alt="Globe icon"
-                        width={16}
-                        height={16}
-                    />
-                    Go to nextjs.org →
-                </a>
-            </footer>
-        </div>
+                        <Form.Group as={Col} md={6}>
+                            <Form.Label>Data do Test Drive</Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="data"
+                                value={formData.data}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+                    </Row>
+
+                    <Row className="mb-3">
+                        <Form.Group as={Col} md={6}>
+                            <Form.Label>Horário</Form.Label>
+                            <Form.Control
+                                type="time"
+                                name="horario"
+                                value={formData.horario}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+                    </Row>
+
+                    <Button type="submit">Agendar Test Drive</Button>
+                </Form>
+            </Container>
+        </Pagina>
     );
-}
+};
+
+export default AgendamentoCarro;

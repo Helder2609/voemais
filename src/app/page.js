@@ -1,25 +1,14 @@
+'use client'
 import Image from "next/image";
 import styles from "./page.module.css";
 import Head from "next/head";
 import { useEffect, useRef } from "react";
 
+
 // Adicione sua chave de API aqui
 const API_KEY = 'YOUR_TOMTOM_API_KEY'; // substitua pela sua chave de API
 
 export default function Home() {
-  const mapRef = useRef(null); // Ref para o mapa
-
-  useEffect(() => {
-    // Inicializa o mapa
-    const map = window.tt.map({
-      key: API_KEY,
-      container: mapRef.current,
-      center: [-46.6333, -23.5505], // Coordenadas iniciais (São Paulo)
-      zoom: 12,
-    });
-
-    return () => map.remove(); // Limpa o mapa ao desmontar
-  }, []);
 
   return (
     <div className={styles.page}>
@@ -73,7 +62,7 @@ export default function Home() {
           </a>
         </div>
 
-        <div style={{ height: '400px', width: '100%', marginTop: '20px' }} ref={mapRef} /> {/* Mapa TomTom */}
+        <div style={{ height: '400px', width: '100%', marginTop: '20px' }} /> {/* Mapa TomTom */}
       </main>
       <footer className={styles.footer}>
         <a

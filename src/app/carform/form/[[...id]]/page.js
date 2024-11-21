@@ -1,235 +1,188 @@
 'use client'
-
-import Pagina from "@/components/Pagina";
-import CarroValidator from "@/validators/CarroValidator";
-import { Formik } from "formik";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Button, Form } from "react-bootstrap";
-import { FaCheck } from "react-icons/fa";
-import { MdOutlineArrowBack } from "react-icons/md";
-import { v4 } from "uuid";
-import InputMask from "react-input-mask";
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // Importa o hook useRouter
+import { Form, Button, Container, Row, Col, InputGroup } from "react-bootstrap";
+import { FaPlus, FaCalendar, FaDollarSign } from "react-icons/fa";
 
-const marcasCarros = {
-    "Volkswagen": ["Fusca", "Gol", "T-Cross", "Tiguan", "Jetta", "Passat"],
-    "Honda": ["Civic", "HR-V", "Fit", "CR-V"],
-    "Toyota": ["Corolla", "Hilux", "Etios", "Camry", "Yaris"],
-    "Chevrolet": ["Onix", "Tracker", "Cruze", "S10"],
-    "Ford": ["Fiesta", "EcoSport", "Ranger", "Mustang", "Fusion"],
-    "Renault": ["Kwid", "Sandero", "Duster", "Captur"],
-    "Hyundai": ["HB20", "Creta", "Elantra", "Tucson"],
-    "Jeep": ["Renegade", "Compass", "Wrangler"],
-    "Nissan": ["Kicks", "Versa", "Sentra", "Frontier"],
-    "Fiat": ["Palio", "Argo", "Toro", "Cronos"],
-    "Kia": ["Seltos", "Sportage", "Cerato", "Rio"],
-    "Peugeot": ["208", "3008", "301", "5008"],
-    "Citroën": ["C3", "C4", "Aircross", "Aircross"],
-    "Mitsubishi": ["L200", "Outlander", "ASX"],
-    "Subaru": ["Forester", "Outback", "Impreza"],
-    "Mercedes-Benz": ["A-Class", "C-Class", "GLA", "GLC"],
-    "BMW": ["1 Series", "3 Series", "X1", "X3"],
-    "Audi": ["A3", "A4", "Q3", "Q5"],
-    "Volkswagen Commercial": ["Amarok", "Transporter", "Crafter"],
-    "Tesla": ["Model S", "Model 3", "Model X", "Model Y"]
-};
+const tiposManutencao = [
+    { nome: "Troca de óleo", custo: 120 },
+    { nome: "Alinhamento e balanceamento", custo: 150 },
+    { nome: "Revisão completa", custo: 800 },
+    { nome: "Substituição de pneus", custo: 400 },
+];
 
-export default function CarroForm({ params }) {
-    const route = useRouter();
+const ManutencaoFormPage = () => {
+    const [veiculo, setVeiculo] = useState("");
+    const [data, setData] = useState("");
+    const [odometro, setOdometro] = useState("");
+    const [custoTotal, setCustoTotal] = useState("");
+    const [itens, setItens] = useState([{ nome: "", custo: "" }]);
+    const router = useRouter(); // Inicializa o router
 
-    const carros = JSON.parse(localStorage.getItem('carros')) || [];
-    const dados = carros.find(item => item.id == params?.id);
-    const carro = dados || { marca: '', modelo: '', ano: '', cor: '', quilometragem: '', foto: '' };
+    const adicionarItem = () => {
+        setItens([...itens, { nome: "", custo: "" }]);
+    };
 
-    const [fotoPreview, setFotoPreview] = useState(carro.foto || '');
-    const [marcaSelecionada, setMarcaSelecionada] = useState(carro.marca || '');
+    const atualizarItem = (index, campo, valor) => {
+        const novosItens = [...itens];
+        novosItens[index][campo] = valor;
+        setItens(novosItens);
+    };
 
-    // Filtra os modelos com base na marca selecionada
-    const modelosFiltrados = marcaSelecionada ? marcasCarros[marcaSelecionada] || [] : [];
+    const calcularCustoTotal = () => {
+        const total = itens.reduce((soma, item) => soma + (parseFloat(item.custo) || 0), 0);
+        setCustoTotal(total.toFixed(2));
+    };
 
-    function salvar(dados) {
-        if (carro.id) {
-            Object.assign(carro, dados);
+    const handleSelecionarTipo = (index, valor) => {
+        const tipoSelecionado = tiposManutencao.find((tipo) => tipo.nome === valor);
+        if (tipoSelecionado) {
+            atualizarItem(index, "nome", tipoSelecionado.nome);
+            atualizarItem(index, "custo", tipoSelecionado.custo.toFixed(2));
         } else {
-            dados.id = v4();
-            carros.push(dados);
+            atualizarItem(index, "nome", valor);
+            atualizarItem(index, "custo", "");
+        }
+        calcularCustoTotal();
+    };
+
+    const salvarManutencaoNoLocalStorage = (novaManutencao) => {
+        const manutencoesExistentes = JSON.parse(localStorage.getItem("manutencoes")) || [];
+        manutencoesExistentes.push(novaManutencao);
+        localStorage.setItem("manutencoes", JSON.stringify(manutencoesExistentes));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        // Verificação para garantir que todos os campos obrigatórios estão preenchidos
+        if (!veiculo || !data || !odometro || custoTotal <= 0) {
+            alert("Por favor, preencha todos os campos obrigatórios.");
+            return;
         }
 
-        localStorage.setItem('carros', JSON.stringify(carros));
-        return route.push('/carform');
-    }
+        const novaManutencao = {
+            id: Date.now(), // Gera um ID único com base no timestamp
+            veiculo,
+            data,
+            odometro,
+            custoTotal: parseFloat(custoTotal),
+            itens,
+        };
 
-    function handleFotoChange(event, setFieldValue) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setFieldValue("foto", reader.result);
-                setFotoPreview(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    }
+        salvarManutencaoNoLocalStorage(novaManutencao);
+
+        alert("Manutenção salva com sucesso!");
+        router.push("/carform"); // Redireciona para a página de listagem
+    };
 
     return (
-        <Pagina titulo="Cadastro de Carros">
+        <Container className="mt-4 p-4 shadow-lg rounded bg-white" style={{ maxWidth: "600px" }}>
+            <h4 className="text-center mb-4">Cadastrar nova manutenção</h4>
+            <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="veiculo" className="mb-3">
+                    <Form.Label>Selecione o veículo:</Form.Label>
+                    <Form.Control
+                        as="select"
+                        value={veiculo}
+                        onChange={(e) => setVeiculo(e.target.value)}
+                        required
+                    >
+                        <option value="">Selecione...</option>
+                        <option value="PWU-6785">PWU-6785</option>
+                        <option value="ABC-1234">ABC-1234</option>
+                    </Form.Control>
+                </Form.Group>
 
-            <Formik
-                initialValues={carro}
-                validationSchema={CarroValidator}
-                onSubmit={values => salvar(values)}
-            >
-                {({
-                    values,
-                    handleChange,
-                    handleSubmit,
-                    setFieldValue,
-                    errors,
-                }) => (
-                    <Form>
-                        <Form.Group className="mb-3" controlId="marca">
-                            <Form.Label>Marca</Form.Label>
-                            <Form.Select
-                                name="marca"
-                                value={values.marca}
-                                onChange={(e) => {
-                                    handleChange(e);
-                                    setMarcaSelecionada(e.target.value);
-                                }}
-                                isInvalid={errors.marca}
-                            >
-                                <option value="">Selecione uma marca</option>
-                                {Object.keys(marcasCarros).map((marca) => (
-                                    <option key={marca} value={marca}>{marca}</option>
-                                ))}
-                            </Form.Select>
-                            <Form.Control.Feedback type="invalid">
-                                {errors.marca}
-                            </Form.Control.Feedback>
+                <Row className="mb-3">
+                    <Col>
+                        <Form.Group controlId="data">
+                            <Form.Label>Data da manutenção:</Form.Label>
+                            <InputGroup>
+                                <InputGroup.Text><FaCalendar /></InputGroup.Text>
+                                <Form.Control
+                                    type="date"
+                                    value={data}
+                                    onChange={(e) => setData(e.target.value)}
+                                    required
+                                />
+                            </InputGroup>
                         </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="modelo">
-                            <Form.Label>Modelo</Form.Label>
-                            <Form.Select
-                                name="modelo"
-                                value={values.modelo}
-                                onChange={handleChange}
-                                isInvalid={errors.modelo}
-                                disabled={!marcaSelecionada} // Desabilita se nenhuma marca for selecionada
-                            >
-                                <option value="">Selecione um modelo</option>
-                                {modelosFiltrados.map((modelo) => (
-                                    <option key={modelo} value={modelo}>{modelo}</option>
-                                ))}
-                            </Form.Select>
-                            <Form.Control.Feedback type="invalid">
-                                {errors.modelo}
-                            </Form.Control.Feedback>
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="ano">
-                            <Form.Label>Ano</Form.Label>
-                            <InputMask
-                                mask="9999" // Máscara para o ano
-                                value={values.ano}
-                                onChange={handleChange('ano')}
-                            >
-                                {(inputProps) => (
-                                    <Form.Control
-                                        {...inputProps}
-                                        type="text"
-                                        name="ano"
-                                        isInvalid={errors.ano}
-                                    />
-                                )}
-                            </InputMask>
-                            <Form.Control.Feedback type="invalid">
-                                {errors.ano}
-                            </Form.Control.Feedback>
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="cor">
-                            <Form.Label>Cor</Form.Label>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="odometro">
+                            <Form.Label>Odômetro:</Form.Label>
                             <Form.Control
                                 type="text"
-                                name="cor"
-                                value={values.cor}
-                                onChange={handleChange}
-                                isInvalid={errors.cor}
+                                value={odometro}
+                                onChange={(e) => setOdometro(e.target.value)}
+                                placeholder="Ex: 32.456 KM"
+                                required
                             />
-                            <Form.Control.Feedback type="invalid">
-                                {errors.cor}
-                            </Form.Control.Feedback>
                         </Form.Group>
+                    </Col>
+                </Row>
 
-                        <Form.Group className="mb-3" controlId="quilometragem">
-                            <Form.Label>Quilometragem</Form.Label>
-                            <InputMask
-                                mask="9.999.999" // Máscara para quilometragem
-                                value={values.quilometragem}
-                                onChange={handleChange('quilometragem')}
-                            >
-                                {(inputProps) => (
-                                    <Form.Control
-                                        {...inputProps}
-                                        type="text"
-                                        name="quilometragem"
-                                        isInvalid={errors.quilometragem}
-                                    />
-                                )}
-                            </InputMask>
-                            <Form.Control.Feedback type="invalid">
-                                {errors.quilometragem}
-                            </Form.Control.Feedback>
+                <Row className="mb-3">
+                    <Col>
+                        <Form.Group controlId="custoTotal">
+                            <Form.Label>Custo total:</Form.Label>
+                            <InputGroup>
+                                <InputGroup.Text><FaDollarSign /></InputGroup.Text>
+                                <Form.Control
+                                    type="text"
+                                    value={`R$ ${custoTotal}`}
+                                    readOnly
+                                />
+                            </InputGroup>
                         </Form.Group>
+                    </Col>
+                </Row>
 
-                        <Form.Group className="mb-3" controlId="placa">
-                            <Form.Label>Placa</Form.Label>
-                            <InputMask
-                                mask="aaa-9*99" // Máscara para placas padrão Brasil
-                                value={values.placa}
-                                onChange={handleChange('placa')}
-                            >
-                                {(inputProps) => (
-                                    <Form.Control
-                                        {...inputProps}
-                                        type="text"
-                                        name="placa"
-                                        isInvalid={errors.placa}
-                                    />
-                                )}
-                            </InputMask>
-                            <Form.Control.Feedback type="invalid">
-                                {errors.placa}
-                            </Form.Control.Feedback>
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="foto">
-                            <Form.Label>Foto</Form.Label>
+                <h5 className="mt-4">Itens de manutenção:</h5>
+                {itens.map((item, index) => (
+                    <Row key={index} className="align-items-center mb-3">
+                        <Col xs={7}>
                             <Form.Control
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleFotoChange(e, setFieldValue)}
+                                as="select"
+                                value={item.nome}
+                                onChange={(e) => handleSelecionarTipo(index, e.target.value)}
+                                required
+                            >
+                                <option value="">Selecione um tipo...</option>
+                                {tiposManutencao.map((tipo) => (
+                                    <option key={tipo.nome} value={tipo.nome}>
+                                        {tipo.nome}
+                                    </option>
+                                ))}
+                                <option value="Outro">Outro...</option>
+                            </Form.Control>
+                        </Col>
+                        <Col xs={4}>
+                            <Form.Control
+                                type="number"
+                                placeholder="Custo"
+                                value={item.custo}
+                                onChange={(e) => {
+                                    atualizarItem(index, "custo", e.target.value);
+                                    calcularCustoTotal();
+                                }}
+                                required
+                                disabled={item.nome !== "Outro"}
                             />
-                            {fotoPreview && (
-                                <div className="mt-3">
-                                    <img src={fotoPreview} alt="Prévia da Foto" style={{ width: "150px" }} />
-                                </div>
-                            )}
-                        </Form.Group>
+                        </Col>
+                    </Row>
+                ))}
+                <Button variant="outline-success" className="mb-3 d-flex align-items-center" onClick={adicionarItem}>
+                    <FaPlus className="me-2" /> Adicionar outro item
+                </Button>
 
-                        <div className="text-center">
-                            <Button onClick={handleSubmit} variant="success">
-                                <FaCheck /> Salvar
-                            </Button>
-                            <Link href="/carform" className="btn btn-danger ms-2">
-                                <MdOutlineArrowBack /> Voltar
-                            </Link>
-                        </div>
-                    </Form>
-                )}
-            </Formik>
-        </Pagina>
+                <Button variant="primary" type="submit" className="w-100">
+                    Salvar manutenção
+                </Button>
+            </Form>
+        </Container>
     );
-}
+};
+
+export default ManutencaoFormPage;
